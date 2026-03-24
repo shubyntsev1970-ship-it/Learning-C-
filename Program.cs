@@ -24,6 +24,7 @@ namespace Learning
                         // Когда строка читается одинаково в обоих направлениях, например "level" или "madam".
                         // Метод должен игнорировать пробелы и регистр букв.
             Test012();  // Пример преобразования массива без дубликатов
+            Test013();  // Для использования в будущем
             Test100();  // Task без async/await
 
         }
@@ -326,6 +327,13 @@ namespace Learning
             return result.ToArray();
         }
 
+        // Для использования в будущем
+        private static void Test013()
+        {
+            Console.WriteLine("Hello, World! From Test013");
+            Console.WriteLine(new string('-', 100));
+        }
+
         // Task без async/await
         private static void Test100()
         {
@@ -338,7 +346,7 @@ namespace Learning
             Console.WriteLine("Hello, World! From Test100");
             for (int i = 0; i < 10; i++)
                 Console.WriteLine(StrExpls.DoSmth());
-            task.Wait();
+            //task.Wait();
         }
     }
 }
