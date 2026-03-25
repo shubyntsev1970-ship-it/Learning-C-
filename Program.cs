@@ -24,8 +24,13 @@ namespace Learning
                         // Когда строка читается одинаково в обоих направлениях, например "level" или "madam".
                         // Метод должен игнорировать пробелы и регистр букв.
             Test012();  // Пример преобразования массива без дубликатов
-            Test013();  // Наследование и полиморфизм
-
+            Test013();  // Наследование и полиморфизм интерфейсов и классов
+            Test014();  // Интерфейсы
+            Test015();  // Абстрактные классы и методы
+            Test016();  // Перегрузка операторов
+                        // Пример неявного (implicit) преобразования типов (неявная конверсия)
+                        // Пример явного (explicit) преобразования типов (явная конверсия)
+            Test017();  // Индексаторы
             Test100();  // Task без async/await
 
         }
@@ -161,7 +166,7 @@ namespace Learning
             Console.WriteLine($"Received (ref) parameter: {z}");
             // Console.WriteLine($"Received (out) parameter: {a}"); // Значение out-параметра не инициализировано при входе в метод, его нужно присвоить внутри метода
             //x++; // Ошибка компиляции: нельзя изменять значение in-параметра
-            y++;   // Изменение значения обычного параметра не влияет на аргумент, переданный в метод
+            // y++;   // Изменение значения обычного параметра не влияет на аргумент, переданный в метод
             z++;
             a = 11;
         }
@@ -328,10 +333,100 @@ namespace Learning
             return result.ToArray();
         }
 
-        // Для использования в будущем
+        // Наследование и полиморфизм интерфейсов и классов-
+        // Пример использования базового класса Animal и производного класса Dog, который переопределяет метод
+        // MakeSound()
         private static void Test013()
         {
+            Animal animal = new("Noname");
+            Animal animal2 = new Dog("Baron");
+            IDisposable disposable = new Dog("Rex");
+            IComparable comparable = new Dog("Charlie");
+
             Console.WriteLine("Hello, World! From Test013");
+            Console.WriteLine(animal2.GetName());
+            animal.MakeSound();
+            animal2.MakeSound();
+            disposable.Dispose();
+
+            try
+            {
+                comparable.CompareTo(new Dog("Buddy"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Произошло исключение при сравнении: " + ex.Message);
+            }
+
+            Console.WriteLine(new string('-', 100));
+        }
+
+        // Интерфейсы
+        private static void Test014()
+        {
+            IAnimal animal = new Cat("Bars");
+            // Это невозможно, так как интерфейсы не могут быть инстанцированы напрямую,
+            // они должны быть реализованы классами.
+            // IAnimal animal2 = new IAnimal()
+            
+            Console.WriteLine("Hello, World! From Test014");
+            Console.WriteLine($"Cats name - {animal.GetName()}");
+            Console.WriteLine($"Cat has {animal.GetLegs()} legs");
+            animal.MakeSound();
+            Console.WriteLine(new string('-', 100));
+        }
+
+        // Абстрактные классы и методы
+        private static void Test015()
+        {
+            // Нельзя создать экземпляр абстрактного класса, так как он предназначен для
+            // наследования и не может быть инстанцирован напрямую.
+            //AbstractAnimal animal = new();
+            NonAbstractAnimal animal = new();
+            
+            Console.WriteLine("Hello, World! From Test015");
+            Console.WriteLine($"Animal has {animal.GetLegs()} legs");
+            animal.MakeSound();
+            animal.MakeSound1();
+            Console.WriteLine(new string('-', 100));
+        }
+
+        // Перегрузка операторов
+        private static void Test016()
+        {
+            SuperInt s = new(5);
+            SuperInt s1 = new(10);
+            MyNumber number = new(15);
+            MyNumber number2 = new(20);
+            MyNumber number3;
+
+            // Пример неявного (implicit) преобразования типов (неявная конверсия)
+            SuperInt d = 6; // Компилятор автоматически преобразует int в SuperInt с помощью неявного оператора преобразования,
+                            // который должен быть определен в классе SuperInt
+
+            // Пример явного (explicit) преобразования типов (явная конверсия)
+            int n = (int)s; // Компилятор требует явного указания преобразования,
+                            // так как может потеряться информация при преобразовании SuperInt в int
+
+            Console.WriteLine("Hello, World! From Test016");
+            SuperInt res = s.Add(s1);
+            Console.WriteLine($"Работает метод Add {s.N} + {s1.N} = {res.N}");
+            number3 = number + number2;
+            Console.WriteLine($"Работает перегрузка оператора (+) {number.Value} + {number2.Value} = {number3.Value}");
+            Console.WriteLine(new string('-', 100));
+        }
+
+        // Индексаторы
+        private static void Test017()
+        {
+            Mylist list = new();
+            // Заполнение списка
+            for (int i = 0; i < 5; i++)
+            {
+                list[i] = i + 1; // Используем индексатор для добавления элементов в список
+            }
+            Console.WriteLine("Hello, World! From Test017");
+            Console.WriteLine($"Third elements in Mylist: {list[2]}");
             Console.WriteLine(new string('-', 100));
         }
 

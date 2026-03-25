@@ -187,4 +187,244 @@ namespace Learning
         }
     }
 
+    // Наследование и полиморфизм интерфейсов и классов
+    class Animal
+    {
+        readonly string name;
+
+        public Animal(string n)
+        {
+            name = n;
+        }
+
+        public string GetName()
+        {
+            return name;
+        }
+
+        public virtual void MakeSound()
+        {
+            Console.WriteLine("Animal makes a sound");
+        }
+    }
+
+    // Ключевое слово sealed означает, что от класса Dog нельзя наследоваться дальше.
+    // Может быть наследован только от одного класса, в данном случае от класса Animal,
+    // и может реализовывать несколько интерфейсов (ICloneable, IComparable, IDisposable).
+    sealed class Dog : Animal, ICloneable, IComparable, IDisposable
+    {
+        // Конструктор класса Dog, который вызывает конструктор базового
+        // класса (:base) Animal для инициализации имени
+        public Dog(string name) : base(name)
+        {
+
+        }
+
+        public object Clone()
+        {
+            throw new NotImplementedException();
+        }
+
+        public int CompareTo(object? obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Dispose()
+        {
+            Console.WriteLine("Disposing Dog resources...");
+        }
+
+        public override void MakeSound()
+        {
+            Console.WriteLine("Dog barks");
+        }
+    }
+
+    // Класс SmallDog пытается наследоваться от класса Dog,
+    // но это невозможно, так как класс Dog объявлен как sealed (запечатанный).
+    /*
+    class SmallDog : Dog
+    {
+     
+    }
+    */
+
+    // Интерфейсы
+    // Интерфейс IAnimal, который определяет контракт для классов, которые его реализуют.
+    // Внутри интерфейса объявлены методы MakeSound(), GetLegs() и GetName(), которые должны быть реализованы
+    // в классах, которые реализуют этот интерфейс.
+    // Внутри только объявления методов, без реализации,
+    // так как интерфейс не может содержать реализацию методов (до C# 8.0).
+    interface IAnimal
+    {
+        void MakeSound();
+        int GetLegs();
+        string GetName();
+    }
+
+    class Cat : IAnimal
+    {
+        private readonly string name;
+        public Cat(string name)
+        {
+            this.name = name;
+        }
+        public void MakeSound()
+        {
+            Console.WriteLine("Cat meows");
+        }
+        public int GetLegs()
+        {
+            return 4;
+        }
+        public string GetName()
+        {
+            return name;
+        }
+    }
+
+    // Абстрактный класс Shape, который содержит абстрактный метод GetArea(),
+    // который должен быть реализован в классах, которые наследуются от этого абстрактного класса.
+    // Абстрактный класс не может быть инстанцирован напрямую, и может содержать 
+    // как абстрактные методы (без реализации), так и обычные методы (с реализацией).
+    abstract class AbstractAnimal
+    {
+        public abstract int GetLegs();
+        public virtual void MakeSound() 
+        {
+            Console.WriteLine("Sound from AbstractAnimal");  
+        }
+    }
+    class NonAbstractAnimal : AbstractAnimal
+    {
+        public override int GetLegs()
+        {
+            return 4;
+        }
+        public void MakeSound1()
+        {
+            Console.WriteLine("Sound from NonAbstractAnimal");
+        }
+    }
+
+    // Перегрузка операторов
+    class MyNumber
+    {
+        public int Value { get; set; }
+        public MyNumber(int value)
+        {
+            Value = value;
+        }
+        // Перегрузка оператора +
+        public static MyNumber operator +(MyNumber a, MyNumber b)
+        // Можно также перегрузить оператор + для сложения MyNumber и int, например:
+        //public static MyNumber operator +(MyNumber a, int b)   или
+        //public static MyNumber operator +(int b, MyNumber a)
+        {
+            return new MyNumber(a.Value + b.Value);
+        }
+        // Перегрузка оператора -
+        public static MyNumber operator -(MyNumber a, MyNumber b)
+        {
+            return new MyNumber(a.Value - b.Value);
+        }
+        // Перегрузка оператора *
+        public static MyNumber operator *(MyNumber a, MyNumber b)
+        {
+            return new MyNumber(a.Value * b.Value);
+        }
+        // Перегрузка оператора /
+        public static MyNumber operator /(MyNumber a, MyNumber b)
+        {
+            if (b.Value == 0)
+                throw new DivideByZeroException("Cannot divide by zero.");
+            return new MyNumber(a.Value / b.Value);
+        }
+
+        // Перегрузка оператора ++
+        public static MyNumber operator ++(MyNumber a)
+        {
+            return new MyNumber(a.Value + 1);
+        }
+    }
+
+    // Перегрузка операторов == != следкет также перегружать методы Equals() и GetHashCode(),
+    // чтобы обеспечить согласованное поведение при сравнении объектов.
+    // Операторы сравнения (<  >,  <=  >=,  == !=) должны быть перегружены вместе,
+    // чтобы обеспечить согласованное поведение при сравнении объектов.
+    class SuperInt
+    {
+        public int N { get; }
+
+        public SuperInt(int n)
+        {
+            N = n;
+        }
+
+        public SuperInt Add (SuperInt other)
+        {
+            return new SuperInt(N + other.N);
+        }
+
+
+        public static bool operator ==(SuperInt a, SuperInt b)
+        {
+            return a.N == b.N;
+        }
+        public static bool operator !=(SuperInt a, SuperInt b)
+        {
+            return a.N != b.N;
+        }
+        public override bool Equals(object? obj)
+        {
+            if (obj is SuperInt other)
+            {
+                return N == other.N;
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return N.GetHashCode();
+        }
+
+        // Пример неявного (implicit) преобразования типов (неявная конверсия)
+        public static implicit operator SuperInt(int n)
+        {
+            return new SuperInt(n);
+        }
+        // Пример явного (explicit) преобразования типов (явная конверсия)
+        public static explicit operator int(SuperInt superInt)
+        {
+            return superInt.N;
+        }
+    }
+
+    // Индексаторы перегруженные в классе Mylist для доступа к элементам списка по индексу
+    // Без заполнения списка данными - только пример синтаксиса индексатора,
+    // который позволяет обращаться к элементам класса Mylist по индексу, как к массиву. 
+    class Mylist
+    {
+        public int this[int index]
+        {
+            get
+            {
+                return 0;
+            }
+            set
+            {
+                value = 0;
+            }
+        }
+
+        Node root;
+        
+        public class Node
+        {
+            public int Data { get; set; }
+            public required Node Next { get; set; }
+        }
+    }
 }
