@@ -267,7 +267,7 @@ namespace Learning
         // Метод должен игнорировать пробелы и регистр букв.
         private static void Test011()
         {
-            string text = "A man a plan a canal Panama";
+            strings text = "A man a plan a canal Panama";
 
 
             Console.WriteLine("Hello, World! From Test011");
