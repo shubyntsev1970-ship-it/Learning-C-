@@ -31,6 +31,7 @@ namespace Learning
                         // Пример неявного (implicit) преобразования типов (неявная конверсия)
                         // Пример явного (explicit) преобразования типов (явная конверсия)
             Test017();  // Индексаторы
+            Test018();  // Атрибуты
             Test100();  // Task без async/await
 
         }
@@ -430,19 +431,27 @@ namespace Learning
             Console.WriteLine(new string('-', 100));
         }
 
+        // Атрибуты
+        private static void Test018()
+        {
+            Console.WriteLine("Hello, World! From Test018");
+            Console.WriteLine(new string('-', 100));
+        }
+
         // Task без async/await
         private static void Test100()
         {
+            Console.WriteLine("Hello, World! From Test100");
             Task task = new(() =>
             {
                 for (int i = 0; i < 1000; i++)
                     Console.WriteLine($"Работа выполняется {i}");
             });
             task.Start();
-            Console.WriteLine("Hello, World! From Test100");
             for (int i = 0; i < 10; i++)
                 Console.WriteLine(StrExpls.DoSmth());
             //task.Wait();
+            Console.WriteLine(new string('-', 100));
         }
     }
 }
