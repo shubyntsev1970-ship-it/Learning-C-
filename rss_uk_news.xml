@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+<title>Цензор.НЕТ - Новини</title>
+<link>https://censor.net</link>
+<atom:link rel="self" type="application/rss+xml" href="https://assets.censor.net/rss/censor.net/rss_uk_news.xml" />
+<atom:link rel="hub" href="https://pubsubhubbub.appspot.com/" />
+<description>Найсвіжіші новини України та світу</description>
+<pubDate>Sun, 29 Mar 2026 22:15:00 +0300</pubDate>
+<lastBuildDate>Sun, 29 Mar 2026 22:15:12 +0300</lastBuildDate>
+<managingEditor>censor.net.ua@gmail.com (Редактор Цензор.НЕТ)</managingEditor>
+<language>uk</language>
+<image>
+<title>Цензор.НЕТ - Новини</title>
+<link>https://https://censor.net</link>
+<url>https://assets.censor.net/images/censor.net/logo/uk/72x72.png</url>
+<width>72</width>
+<height>72</height>
+</image>
+<item>
+<title><![CDATA[На фронті відбулося 123 боєзіткнення: ворог застосував майже 6 тис. дронів-камікадзе, - Генштаб]]></title>
+<link>https://censor.net/ua/news/3607785/genshtab-zsu-za-dobu-vidbulosya-123-boyi-na-fronti</link>
+<description><![CDATA[Від початку доби неділі, 29 березня, на фронті відбулося 123 бойових зіткнення. Сили оборони продовжують зупиняти ворога, знищують особовий склад та виснажують бойовий потенціал окупантів, завдаючи систематичного вогневого ураження.]]></description>
+<guid isPermaLink="false">
+https://censor.net/ua/n3607785
+</guid>
+<pubDate>Sun, 29 Mar 2026 22:15:00 +0300</pubDate>
+<atom:updated>2026-03-29T22:15:12+03:00</atom:updated>
+<dc:creator>Цензор.НЕТ</dc:creator>
+<enclosure url="https://images.cnscdn.com/c/2/2/d/c22dc71d8c47a9fff66d06ace958badd/528x330.jpg" type="image/jpeg" length="22694" />
+</item>
+<item>
+<title><![CDATA[Росія атакує Україну ударними безпілотниками, - Повітряні сили (оновлено)]]></title>
+<link>https://censor.net/ua/news/3607776/rosiya-prodovjuye-ataky-na-ukrayinu-udarnymy-bezpilotnykamy</link>
+<description><![CDATA[Російські війська й надалі здійснюють атаки на територію України із застосуванням ударних безпілотників.]]></description>
+<guid isPermaLink="false">
+https://censor.net/ua/n3607776
+</guid>
+<pubDate>Sun, 29 Mar 2026 22:07:00 +0300</pubDate>
+<atom:updated>2026-03-29T22:07:42+03:00</atom:updated>
+<dc:creator>Цензор.НЕТ</dc:creator>
+<enclosure url="https://images.cnscdn.com/5/7/d/0/57d0faf17b862f939f313e9417047b17/528x330.jpg" type="image/jpeg" length="18202" />
+</item>
+</channel>
+</rss>

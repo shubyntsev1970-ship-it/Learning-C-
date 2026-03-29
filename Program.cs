@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
+using System.Net;
+using System.Xml.Serialization;
+using System.IO;
+using System.Collections.Generic;
 
 namespace Learning
 {
@@ -31,7 +34,10 @@ namespace Learning
                         // Пример неявного (implicit) преобразования типов (неявная конверсия)
                         // Пример явного (explicit) преобразования типов (явная конверсия)
             Test017();  // Индексаторы
-            Test018();  // Атрибуты
+            Test018();  // Обобщенные типы
+            Test019();  // Работа с потоками сериализация и десериализация объектов
+            Thread.Sleep(1000); // Задержка для завершения асинхронной операции в Test019, так как метод Test019 объявлен с async void, что не рекомендуется для методов, которые не являются обработчиками событий, так как это может привести к непредсказуемому поведению и затруднить отладку.
+                                // В данном случае, задержка позволяет увидеть результат асинхронной операции перед завершением приложения.
             Test100();  // Task без async/await
 
         }
@@ -431,12 +437,49 @@ namespace Learning
             Console.WriteLine(new string('-', 100));
         }
 
-        // Атрибуты
+        // Обобщенные типы
         private static void Test018()
         {
             Console.WriteLine("Hello, World! From Test018");
+
+            Tree<int> t1 = new Tree<int>();
+            Tree<double> t2 = new Tree<double>();
+
+            // Пример List<T> - обобщенного типа из стандартной библиотеки .NET
+            List<string> stringList = new List<string>();
+            List<int> intList = new List<int>();
+
             Console.WriteLine(new string('-', 100));
         }
+
+        // Работа с потоками сериализация и десериализация объектов
+        private async static void Test019()
+        {
+            Console.WriteLine("Hello, World! From Test019");
+
+            WebClient web = new();
+            // Скачиваем строку с RSS-каналом новостей с сайта censor.net
+            //string s = await web.DownloadStringTaskAsync(new Uri("https://assets.censor.net/rss/censor.net/rss_uk_news.xml", UriKind.Absolute));
+            // Скачиваем строку с локального файла
+            //string s = await web.DownloadStringTaskAsync(new Uri("file:///D:/Project/rss_uk_news.xml", UriKind.Absolute));
+            // или читаем строку из локального файла так          
+            string s = await File.ReadAllTextAsync("D:/Project/Learning C#/rss_uk_news.xml"); 
+
+            XmlSerializer xml = new(typeof(RssClass));
+            RssClass? res = xml.Deserialize(new MemoryStream(Encoding.UTF8.GetBytes(s))) as RssClass;
+
+            res.Channel?.Items?.ForEach(item =>
+            {
+                Console.WriteLine($"Title: {item.Title}");
+                Console.WriteLine($"Link: {item.Link}");
+                Console.WriteLine($"Description: {item.Description}");
+                Console.WriteLine($"PubDate: {item.PubDate}");
+                Console.WriteLine(new string('-', 50));
+            });
+
+            Console.WriteLine(new string('-', 100));
+        }
+
 
         // Task без async/await
         private static void Test100()

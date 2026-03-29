@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Xml.Serialization;
 
 namespace Learning
 {
@@ -291,9 +292,9 @@ namespace Learning
     abstract class AbstractAnimal
     {
         public abstract int GetLegs();
-        public virtual void MakeSound() 
+        public virtual void MakeSound()
         {
-            Console.WriteLine("Sound from AbstractAnimal");  
+            Console.WriteLine("Sound from AbstractAnimal");
         }
     }
     class NonAbstractAnimal : AbstractAnimal
@@ -362,7 +363,7 @@ namespace Learning
             N = n;
         }
 
-        public SuperInt Add (SuperInt other)
+        public SuperInt Add(SuperInt other)
         {
             return new SuperInt(N + other.N);
         }
@@ -420,11 +421,68 @@ namespace Learning
         }
 
         Node root;
-        
+
         public class Node
         {
             public int Data { get; set; }
             public required Node Next { get; set; }
         }
+    }
+
+    // Обобщенные типы (Generics) - позволяют создавать классы, методы, интерфейсы
+    // и делегаты с параметрами типа,
+    // что обеспечивает типобезопасность и повторное использование кода.
+    // Обобщенные типы импользуются для создания коллекций, таких как List<T>, Dictionary<TKey, TValue> и т.д.
+    interface INode<T>
+    {
+        T GetData();
+    }
+    // Сдесь <T> означает, что класс Tree и Node является обобщенным типом,
+    // который может работать с любым типом данных,
+    // и T будет заменен на конкретный тип данных при создании экземпляра класса Node.
+    class Tree<T>
+    {
+        class Node<T> : INode<T>
+        {
+            T value;
+
+            Node<T> left;
+            Node<T> right;
+
+            public T GetData()
+            {
+                return value;
+            }
+        }
+
+        Node<T> root;
+
+    }
+
+    // Работа с потоками сериализация и десериализация объектов
+    // Класс RssClass, который может быть сериализован в XML формат с помощью атрибута [XmlRoot].
+    [XmlRoot(ElementName ="rss")]
+    public class RssClass
+    {
+        [XmlElement(ElementName = "channel")]
+        public ChannelClass? Channel { get; set; }
+    }
+
+    public class ChannelClass
+    {
+        [XmlElement(ElementName = "item")]
+        public List<ItemClass>? Items { get; set; }
+    }
+
+    public  class ItemClass
+    {
+        [XmlElement(ElementName = "title")]
+        public string? Title { get; set; }
+        [XmlElement(ElementName = "link")]
+        public string? Link { get; set; }
+        [XmlElement(ElementName = "description")]
+        public string? Description { get; set; }
+        [XmlElement(ElementName = "pubDate")]
+        public string? PubDate { get; set; }
     }
 }
