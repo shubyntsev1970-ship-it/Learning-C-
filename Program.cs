@@ -5,6 +5,12 @@ using System.Net;
 using System.Xml.Serialization;
 using System.IO;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Security;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Concurrent;
+
 
 namespace Learning
 {
@@ -38,8 +44,10 @@ namespace Learning
             Test019();  // Работа с потоками сериализация и десериализация объектов
             Thread.Sleep(1000); // Задержка для завершения асинхронной операции в Test019, так как метод Test019 объявлен с async void, что не рекомендуется для методов, которые не являются обработчиками событий, так как это может привести к непредсказуемому поведению и затруднить отладку.
                                 // В данном случае, задержка позволяет увидеть результат асинхронной операции перед завершением приложения.
+            Test020();  // Работа с символами и строками
+            Test021();  // Коллекции
+            Test022();  // Использование LINQ
             Test100();  // Task без async/await
-
         }
 
 
@@ -320,8 +328,10 @@ namespace Learning
         // Пример преобразования массива без дубликатов
         public static int[] RemoveDuplicates(int[] numbers)
         {
-            // Это лаконично но без контроля над порядком элементов, так как Distinct() не гарантирует сохранение порядка
-            // в старых версиях C#. В C# 14.0 и выше Distinct() сохраняет порядок, так что этот способ будет работать, если проект настроен на использование C# 14.0 или выше.
+            // Это лаконично но без контроля над порядком элементов, так как Distinct()
+            // не гарантирует сохранение порядка
+            // в старых версиях C#. В C# 14.0 и выше Distinct() сохраняет порядок,
+            // так что этот способ будет работать, если проект настроен на использование C# 14.0 или выше.
             // Distinct() — убирает дубликаты
             // [.....] — это collection expression(C# 12), превращает в массив
             //return [.. numbers.Distinct()];
@@ -480,7 +490,286 @@ namespace Learning
             Console.WriteLine(new string('-', 100));
         }
 
+        // Работа с символами и строками
+        private static void Test020()
+        {
+            Console.WriteLine("Hello, World! From Test020");
 
+            // u(unsigned) означает, что символ задается в виде Unicode-экранированной последовательности,
+            // а 0809 - это шестнадцатеричный код символа в стандарте Unicode. В данном случае,
+            // \u0809 соответствует символу "SAMARITAN MARK SEPARATOR" (U+0809) из блока "Samaritan" в стандарте Unicode.
+            char c = '\u0809';
+            Console.WriteLine($"Символ: {c}");
+            // s и s1 ссылаются на одну и ту же строку в пуле строк, так как строки являются неизменяемыми
+            // и компилятор оптимизирует их хранение, помещая одинаковые строковые литералы
+            // в пул строк для экономии памяти.
+            string s = "Hello";
+            string s1 = "Hello";
+            Console.WriteLine(string.ReferenceEquals(s,s1));    // True, так как s и s1 ссылаются на одну и ту 
+                                                                // же строку в пуле строк       
+            s1.Replace('e', 'y');
+            // s1 не изменится, так как строки являются неизменяемыми,
+            // метод Replace возвращает новую строку с заменой, но не изменяет исходную строку s1.
+            Console.WriteLine(s1); // Вывод: Hello, так как s1 не изменился после вызова Replace
+
+            // Если мы хотим изменить строку, то нужно присвоить
+            // результат метода Replace обратно переменной s1
+            s1 = s1.Replace('e', 'y');
+            Console.WriteLine(s1); // Вывод: Hyllo, так как s1 теперь ссылается на новую строку,
+                                   // которая была возвращена методом Replace после замены 'e' на 'y'
+
+            // Символ @ позволяет использовать строковые литералы в виде verbatim string literals,
+            // которые сохраняют все символы, включая обратные слэши, без необходимости экранирования.
+            Console.WriteLine("D:\\Project\\Learning C#\\rss_uk_news.xml");
+            Console.WriteLine(@"D:\Project\Learning C#\rss_uk_news.xml");
+
+            // StringBuilder используется для создания и изменения строк без создания новых объектов строк,
+            // что может быть более эффективным при выполнении большого количества операций со строками,
+            // таких как конкатенация или замена символов.
+            // Любые операции, которые изменяют строку, будут выполняться на одном и том же объекте StringBuilder,
+            // В отличие от строк операции со StringBuilder не создают новые объекты, а изменяют существующий
+            StringBuilder sb = new("Hello");
+            Console.WriteLine($"From StringBuilder {sb}"); // Вывод: Hello
+            sb.Replace('e', 'y');
+            // Символ $ позволяет использовать строковые литералы в виде interpolated string literals,
+            // которые позволяют вставлять выражения внутри строковых литералов, заключая их в фигурные скобки {}.
+            // В данном случае, {sb} будет заменено на значение переменной sb при выводе строки.
+            Console.WriteLine($"From StringBuilder {sb}"); // Вывод: Hyllo, так как метод Replace изменяет существующий объект StringBuilder,
+                                                           // а не создает новый объект, как это происходит с обычными строками.
+
+            // Пример безопасной строки для хранения пароля, которая очищается из памяти после использования
+            // Такая строка создается в неуправляемой памяти и не может быть перемещена сборщиком мусора (GC),
+            // что позволяет гарантировать, что она будет очищена из памяти после использования.
+            // То есть такой объект нужно очищать вручную, вызывая метод Dispose()
+            // или используя конструкцию using, чтобы гарантировать, что память будет освобождена
+            // даже в случае возникновения исключения.
+            SecureString securePassword = new();
+            securePassword?.AppendChar('P');
+            Console.WriteLine($"Secure password length: {securePassword.Length}");
+            securePassword?.Dispose(); // Очищаем память, выделенную для securePassword
+
+            // После вызова Dispose() объект securePassword становится недопустимым для использования,
+            // так как его ресурсы были освобождены.
+            // Поэтому, если попытаться обратиться к свойству Length после вызова Dispose(),
+            // будет выброшено исключение ObjectDisposedException,
+            //Console.WriteLine($"Secure password length: {securePassword.Length}");
+
+            // Здесь securePassword2 будет автоматически очищен из памяти после выхода из блока using
+            // даже если внутри блока произойдет исключение, так как конструкция using
+            // гарантирует вызов метода Dispose() для объекта securePassword2 при выходе из блока.
+            using (SecureString securePassword2 = new())
+            {
+                securePassword2.AppendChar('S');
+                Console.WriteLine($"Secure password length: {securePassword2.Length}");
+            } 
+
+            Console.WriteLine(new string('-', 100));
+        }
+
+        // Коллекции
+        private static void Test021()
+        {
+            Console.WriteLine("Hello, World! From Test021");
+            // Пример старой коллекции ArrayList, которая может хранить объекты любого типа,
+            // так как она не является обобщенной, но для доступа к элементам нужно выполнять приведение типов,
+            // что может привести к ошибкам времени выполнения.
+            // Приведение типов - это boxing и unboxing, которые могут негативно влиять на производительность,
+            // так как требуют дополнительных операций для упаковки и распаковки значимых типов.
+            // Также к старым типам коллекций относятся Hashtable, Stack и Queue
+            // из пространства имен System.Collections.
+            
+            ArrayList list = [3, "Hello"]; // Вместо 3 строк ниже
+            //ArrayList list = new();
+            //list.Add(3);
+            //list.Add("Hello");
+            
+            foreach (object obj in list)
+            {
+                Console.WriteLine(obj);
+            }
+            foreach (var item in list)
+            {
+                Console.WriteLine(item);
+            }
+
+            // Новые коллекции из пространства имен System.Collections.Generic используют обобщенные типы,
+            // которые обеспечивают безопасность типов на этапе компиляции,
+            // такие как List<T>, LinkedList<T>, Dictionary<TKey, TValue>, SortedDictionary<TKey, TValue>,
+            // Stack<T> и Queue<T>
+            // HashSet<T> и SortedSet<T>. Они позволяют хранить
+            // элементы определенного типа без необходимости приведения типов,
+            // HashSet<T> и SortedSet<T> - это коллекции, которые хранят уникальные элементы и обеспечивают
+            // высокую производительность при операциях добавления, удаления и поиска элементов.
+            // HashSet<T> не гарантирует порядок элементов, а SortedSet<T> хранит элементы в отсортированном
+            // порядке.
+            // Список всех коллекций из пространства имен System.Collections.Generic
+            // можно найти в официальной документации Microsoft по ссылке:
+            // https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic?view=net-10.0
+
+            List<int> list1 = [3, 5]; // Вместо 3 строк ниже
+
+            //List<int> list1 = new();
+            //list1.Add(3);
+            //list1.Add(5);
+
+            foreach (int item in list1) 
+            { 
+                Console.WriteLine(item);
+            }
+
+            SortedDictionary<int,string> SrtDic= new SortedDictionary<int, string>
+            {
+                { 2, "Two" },
+                { 1, "One" }
+            }; // Вместо 3 строк ниже
+
+            //SortedDictionary<int, string> SrtDic = new SortedDictionary<int, string>();
+            //SrtDic.Add(2, "Two");
+            //SrtDic.Add(1, "One");
+
+            Console.WriteLine($"Value with key 1 in SortedDictionary: {SrtDic[1]}");
+            Console.WriteLine($"Value with key 2 in SortedDictionary: {SrtDic[2]}");
+
+            // Безопасность коллекций в многопоточном окружении
+            // обеспечивается с помощью классов из пространства имен System.Collections.Concurrent,
+            // таких как ConcurrentDictionary<TKey, TValue>, ConcurrentQueue<T>, ConcurrentBag<T>
+            // ConcurrentStack<T> и BlockingCollection<T>.
+            ConcurrentDictionary<int, string> dict = new ConcurrentDictionary<int, string>();
+
+            Parallel.For(0, 100, i =>
+            {
+                dict.TryAdd(i, $"Value {i}");
+            });
+
+            Console.WriteLine($"размер словаря: {dict.Count}");
+            
+            Console.WriteLine(new string('-', 100));
+        }
+
+        // Использование LINQ
+        // LINQ (Language Integrated Query) - это мощный инструмент для работы с коллекциями данных,
+        // который позволяет выполнять запросы к данным в стиле SQL прямо в коде C#.
+        // Он обеспечивает удобный синтаксис для фильтрации, сортировки, группировки и проекции данных
+        // из различных источников, таких как массивы, списки, базы данных и XML-документы.
+        // Примеры методов расширения LINQ включают Where, Select, OrderBy, GroupBy, Join и многие другие,
+        // которые позволяют легко и эффективно обрабатывать данные в коллекциях.
+        private static void Test022()
+        {
+            Console.WriteLine("Hello, World! From Test022");
+
+            // Пример создания расширения для существующего класса string
+            string s = "Hello World !";
+            Console.WriteLine($"Original string: {s}");
+
+            // Вазывается статический метод расширения ToUpperCase, который определен в классе
+            // StringExtensions и принимает строку в качестве аргумента,
+            // и возвращает новую строку, которая является верхним регистром исходной строки.
+            Console.WriteLine($"Uppercase string: {StringExtensions.ToUpperCase(s)}");
+            // Вазывается статический метод расширения RemoveSpaces, который определен в классе
+            // StringExtensions и принимает строку в качестве аргумента, и возвращает новую строку,
+            // которая является исходной строкой без пробелов.
+            Console.WriteLine($"String without spaces: {StringExtensions.RemoveSpaces(s)}");
+
+            // Цепочка вызовов методов расширения для преобразования строки в верхний регистр и
+            // удаления пробелов
+            Console.WriteLine($"Uppercase string without spaces: {s.ToUpperCase().RemoveSpaces()}");
+
+            // Пример создания анонимного типа для хранения данных о человеке,
+            // который не требует создания отдельного класса для представления этих данных.
+            // При этом автоматически создается класс с именем,
+            // сгенерированным компилятором, который содержит свойства Name и Street,
+            // и эти свойства доступны только для чтения, так как анонимные типы являются неизменяемыми.
+            var p1 = new { Name = "John Doe", Street = "123 Main St" };
+
+            List<Person> p = new();
+            // Пример инициализации свойств класса Person с помощью инициализатора объектов (object initializer),
+            // который позволяет создавать объекты и задавать значения их свойств в одной конструкции.
+            p.Add(new Person() { FirstName = "John", LastName = "Doe", Age = 30, Address = "123 Main St" });
+            p.Add(new Person() { FirstName = "Jane", LastName = "Smith", Age = 25, Address = "456 Elm St" });
+            p.Add(new Person() { FirstName = "Bob", LastName = "Johnson", Age = 40, Address = "789 Oak St" });
+            p.Add(new Person() { FirstName = "Alice", LastName = "Williams", Age = 35, Address = "321 Pine" });
+
+            // Пример использования старого метода поиска элементов в коллекции с помощью цикла foreach,
+            // который требует явного перебора всех элементов и проверки условия внутри цикла.
+            List<Person> selected = new();
+
+            // var person - это переменная цикла, которая последовательно принимает значение каждого элемента
+            // из коллекции p при каждой итерации цикла foreach. Тип переменной person определяется
+            // автоматически компилятором на основе типа элементов в коллекции p, который является
+            // List<Person>, поэтому person будет иметь тип Person.
+            foreach (var person in p)
+            {
+                if (person.Age > 30)
+                {
+                    selected.Add(person);
+                    Console.WriteLine($"Person older than 30: {person.FirstName} {person.LastName}");
+                }
+            }
+            Console.WriteLine(selected.Count); // Вывод: 2, так как в списке selected будут
+                                               // добавлены только те объекты Person,
+                                               // у которых возраст больше 30 (Bob Johnson и Alice Williams)
+
+            // LINQ-запрос для получения тех же результатов, что и в цикле foreach,
+            // но с более удобным синтаксисом и
+            // без необходимости явного перебора всех элементов и проверки условия внутри цикла.
+            Console.WriteLine("Using LINQ:");
+            // => - это лямбда-выражение, которое представляет собой анонимный метод,
+            // которая может быть передана в качестве аргумента метода расширения Where.
+            // => — "стрелка", читается как "возвращает"
+            /*
+            person => person.Age > 30 
+            можно записать в виде отдельного метода, 
+            который будет выполнять ту же функцию, что и лямбда-выражение,
+            bool IsOlderThan30(Person person)
+            {
+                return person.Age > 30;
+            }
+            */
+
+            p.Where(person => person.Age > 30)
+             .ToList()
+             .ForEach(person => Console.WriteLine($"Person older than 30: {person.FirstName} {person.LastName}"));
+
+            var list = p.Where(it => it.Age > 30).Select(item => item);
+            // или так, используя метод расширения Select для проекции данных в новый анонимный тип,
+            // который содержит только имя человека, составленное из его имени и фамилии.
+            var list1 = p.Where(it => it.Age > 30).Select(item => 
+            new {Name=String.Format("{0} {1}", item.FirstName, item.LastName), AgeAge=item.Age });
+            foreach (var item in list)
+            {
+                Console.WriteLine($"Person older than 30: {item}");
+            }
+
+            foreach (var item in list1)
+            {
+                Console.WriteLine($"Person older than 30: {item.Name}  {item.AgeAge}");
+            }
+
+            // или так
+            var list2 = 
+                from item in p
+                where item.Age > 30
+                select new { Name = String.Format("{0} {1}", item.FirstName, item.LastName), AgeAge = item.Age };
+            
+            foreach (var item in list2)
+            {
+                Console.WriteLine($"Person older than 30: {item.Name}  {item.AgeAge}");
+            }
+
+            // или так
+            var list3 = 
+                from item in p
+                where item.Age > 30
+                select item;
+            
+            foreach (var item in list3)
+            {
+                Console.WriteLine($"Person older than 30: {item}");
+            }
+
+            Console.WriteLine(new string('-', 100));
+        }
+        
         // Task без async/await
         private static void Test100()
         {

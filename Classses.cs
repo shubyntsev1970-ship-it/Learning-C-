@@ -485,4 +485,32 @@ namespace Learning
         [XmlElement(ElementName = "pubDate")]
         public string? PubDate { get; set; }
     }
+
+    // Использование LINQ
+    class Person
+    { 
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public int Age { get; set; }
+        public string? Address { get; set; }
+
+    }
+    
+    // Пример создания расширения для существующего класса string
+    public static class StringExtensions
+    {
+        // Метод расширения для класса string, который возвращает строку в верхнем регистре
+        // this string str - означает, что этот метод расширения будет применяться к объектам типа string,
+        // и str будет представлять собой экземпляр строки, к которому применяется этот метод расширения.
+        public static string ToUpperCase(this string str)
+        {
+            return str.ToUpper();
+        }
+
+        // Метод расширения для класса string, который удаляет все пробелы из строки
+        public static string RemoveSpaces(this string str)
+        {
+            return str.Replace(" ", "");
+        }
+    }
 }
