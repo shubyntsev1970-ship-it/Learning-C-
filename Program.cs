@@ -43,7 +43,7 @@ namespace Learning
                         // Пример явного (explicit) преобразования типов (явная конверсия)
             Test017();  // Индексаторы
             Test018();  // Обобщенные типы
-            Test019();  // Работа с потоками сериализация и десериализация объектов
+            await Test019();  // Работа с потоками сериализация и десериализация объектов
             Thread.Sleep(1000); // Задержка для завершения асинхронной операции в Test019, так как метод Test019 объявлен с async void, что не рекомендуется для методов, которые не являются обработчиками событий, так как это может привести к непредсказуемому поведению и затруднить отладку.
                                 // В данном случае, задержка позволяет увидеть результат асинхронной операции перед завершением приложения.
             Test020();  // Работа с символами и строками
@@ -51,6 +51,7 @@ namespace Learning
             Test022();  // Использование LINQ
             Test023();  // Работа с сетью
             Test024();  // Интеграция с неуправляемым кодом
+            Test025();  // Использование лямбды => 
             await Test100();  // Ассинхронные программирование. Процессы и потоки. async/await 
         }
 
@@ -467,11 +468,11 @@ namespace Learning
         }
 
         // Работа с потоками сериализация и десериализация объектов
-        private async static void Test019()
+        private async static Task Test019()
         {
             Console.WriteLine("Hello, World! From Test019");
 
-            WebClient web = new();
+            // WebClient web = new();
             // Скачиваем строку с RSS-каналом новостей с сайта censor.net
             //string s = await web.DownloadStringTaskAsync(new Uri("https://assets.censor.net/rss/censor.net/rss_uk_news.xml", UriKind.Absolute));
             // Скачиваем строку с локального файла
@@ -482,7 +483,7 @@ namespace Learning
             XmlSerializer xml = new(typeof(RssClass));
             RssClass? res = xml.Deserialize(new MemoryStream(Encoding.UTF8.GetBytes(s))) as RssClass;
 
-            res.Channel?.Items?.ForEach(item =>
+            res?.Channel?.Items?.ForEach(item =>
             {
                 Console.WriteLine($"Title: {item.Title}");
                 Console.WriteLine($"Link: {item.Link}");
@@ -828,6 +829,132 @@ namespace Learning
                     }
                 }
             }
+
+            Console.WriteLine(new string('-', 100));
+        }
+
+        // Использование лямбды =>
+        private unsafe static void Test025()
+        {
+            Console.WriteLine("Hello, World! From Test025");
+
+            // пример 1 с лямбдой
+            // Func - это делегат
+            // public delegate TResult Func<in T, out TResult>(T arg)
+            // where T : allows ref struct
+            // where TResult : allows ref struct;
+            // x => x * x — это анонимная функция
+            // Func<int, int>:принимает int возвращает int
+            int result;
+            Func<int, int> square = x => x * x;
+            result = square(5); // 25
+            Console.WriteLine($"Результат с лямбдой: {result}");
+
+            // пример 1 без лямбды
+            // Без лямбды мы просто создаём обычный метод и передаём ссылку на него
+            static int Square(int x)
+            {
+                return x * x;
+            }
+            square = Square;
+            result = square(5); // 25
+            Console.WriteLine($"Результат без лямбды: {result}");
+
+            // пример 2 с лямбдой с несколькими параметрами
+            // Лямбда просто заменяет объявление метода
+            // (a, b) => a + b — функция с двумя аргументами
+            // Лямбда просто заменяет объявление метода
+            Func<int, int, int> sum = (a, b) => a + b;
+            result = sum(3, 4); // 7
+            Console.WriteLine($"Результат с лямбдой: {result}");
+
+            // пример 2 без лямбды
+            // Определяем метод для вычисления суммы двух чисел
+            static int Sum(int a, int b)
+            {
+                return a + b;
+            }
+            // Используем метод через делегат
+            sum = Sum;
+            // Пример вызова
+            result = sum(3, 4); // Результат: 7
+            Console.WriteLine($"Результат без лямбды: {result}");
+
+            // пример 3 с лямбдой
+            // Predicate < T > — возвращает bool
+            // Используется для условий(фильтрация, проверки)
+            Predicate<int> isEven = x => x % 2 == 0;
+            bool res = isEven(4); // true
+            Console.WriteLine($"Результат с лямбдой: {res}");
+
+            // пример 3 без лямбды
+            bool IsEven(int x)
+            {
+                return x % 2 == 0;
+            }
+            isEven = IsEven;
+            res = isEven(4); // true
+            Console.WriteLine($"Результат без лямбды: {res}");
+
+            // пример 4 с лямбдой
+            // LINQ
+            // Where(...) ожидает функцию
+            // Лямбда — это короткий способ передать эту функцию
+            var numbers = new List<int> { 1, 2, 3, 4, 5 };
+            var evenNumbers = numbers.Where(x => x % 2 == 0).ToList();
+            Console.WriteLine("Результат с лямбдой:");
+            foreach (var item in evenNumbers)
+            {
+                Console.WriteLine(item);
+            }
+
+            // пример 4 без лямбды
+            bool IsEven1(int x)
+            {
+                return x % 2 == 0;
+            }
+            evenNumbers = numbers.Where(IsEven1).ToList();
+            Console.WriteLine("Результат без лямбды");
+            foreach (var item in evenNumbers)
+            {
+                Console.WriteLine(item);
+            }
+
+            // пример 5 с лямбдой
+            // Action < T > — ничего не возвращает Просто выполняет действие
+            Action<string> print = message => Console.WriteLine(message);
+            Console.WriteLine("Результат с лямбдой:");
+            print("Hello");
+
+            // пример 5 без лямбды
+            void Print(string message)
+            {
+                Console.WriteLine(message);
+            }
+            print = Print;
+            Console.WriteLine("Результат без лямбды");
+            print("Hello");
+
+            // пример 6 с лямбдой
+            // Если логика сложная → используем { }  Это уже почти полноценный метод
+            Func<int, int> process = x =>
+            {
+                int result = x * 2;
+                return result + 1;
+            };
+            result = process(5); // 11
+            Console.WriteLine($"Результат с лямбдой: {result}");
+
+            // пример 6 без лямбды
+            int Process(int x)
+            {
+                int result = x * 2;
+                return result + 1;
+            }
+            process = Process;
+            result = process(5); // 11
+            Console.WriteLine($"Результат без лямбды: {result}");
+
 
             Console.WriteLine(new string('-', 100));
         }
