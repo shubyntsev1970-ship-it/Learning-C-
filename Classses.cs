@@ -4,22 +4,6 @@ using System.Xml.Serialization;
 namespace Learning
 {
 
-    // StringBuilder
-    internal static class StrExpls
-
-    {
-        public static string DoSmth()
-        {
-            var sb = new StringBuilder(10);
-            for (int i = 0; i < 10; i++)
-            {
-                sb.Append(i);
-            }
-
-            return sb.ToString();
-        }
-    }
-
     // Просто класс 1
     class Butterfly
     {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
 using System.Xml.Serialization;
@@ -10,13 +11,14 @@ using System.Security;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 
 
 namespace Learning
 {
     internal static class Program
     {
-        private static void Main()
+        private async static Task Main()
         {
             Test001();  // Просто класс 1
             Test002();  // Просто класс 2
@@ -47,7 +49,9 @@ namespace Learning
             Test020();  // Работа с символами и строками
             Test021();  // Коллекции
             Test022();  // Использование LINQ
-            Test100();  // Task без async/await
+            Test023();  // Работа с сетью
+            Test024();  // Интеграция с неуправляемым кодом
+            await Test100();  // Ассинхронные программирование. Процессы и потоки. async/await 
         }
 
 
@@ -769,21 +773,206 @@ namespace Learning
 
             Console.WriteLine(new string('-', 100));
         }
+
+
+        // Работа с сетью
+        private static void Test023()
+        {
+            Console.WriteLine("Hello, World! From Test023");
+
+            req = WebRequest.Create("http://censor.net") as HttpWebRequest;
+            req.BeginGetResponse((result) => 
+            { HttpWebResponse res = req.EndGetResponse(result) as HttpWebResponse;}, null);
+            Thread.Sleep(1000);
+            
+            // или
+            //req.BeginGetResponse(Getresponse, null);
+            //Thread.Sleep(2000);
+
+            Console.WriteLine(new string('-', 100));
+        }
+
+        static HttpWebRequest req;
+        static void Getresponse(IAsyncResult result)
+        {
+            HttpWebResponse res = req.EndGetResponse(result) as HttpWebResponse;
+        }
+
+        // Интеграция с неуправляемым кодом
+        [DllImport("msvcrt.dll")]
+        public static extern int puts(string c);
         
-        // Task без async/await
-        private static void Test100()
+        [DllImport("msvcrt.dll")]
+        public static extern int _flushall();
+
+        private unsafe static void Test024()
+        {
+            Console.WriteLine("Hello, World! From Test024");
+            
+            puts("Test");
+            _flushall();
+
+            char[] a = ['a', 'b', 'c'];
+            unsafe  // Или перед методом или перед блоком кода
+            {
+                // fixed означает фиксацию блока в памяти, который не будет затрагивать
+                // GC (сборщик мусора)
+                fixed (char* p = a)
+                {
+                    // p++; // Нельзя так
+                    char* temp = p;
+                    // temp++; // А так можно
+                    for (int i = 0; i < a.Length; i++)
+                    { 
+                        Console.WriteLine(*temp++);
+                    }
+                }
+            }
+
+            Console.WriteLine(new string('-', 100));
+        }
+
+        // Ассинхронные программирование. Процессы и потоки.
+        // Пример async/await также в приложении Windows forms
+        private async static Task Test100()
         {
             Console.WriteLine("Hello, World! From Test100");
-            Task task = new(() =>
+            // Для  создания потоков лучше не использовать класс Thread из-за его сложности и низкого уровня
+            // абстракции, а использовать более высокоуровневые абстракции, такие как Task и async/await,
+            // которые обеспечивают более удобный и эффективный способ работы с асинхронным кодом и
+            // многопоточностью в C#.
+
+            // Thread → низкоуровневый, ты сам управляешь потоком (создание, жизнь, завершение)
+            Thread t = new Thread(() => { Console.WriteLine("Hello from Thread"); } );
+            t.Start();
+            Thread.Sleep(1000); // Если без Sleep, то не увидим на консоли предыдущего сообщения 
+            Console.WriteLine("Hello from Main");
+
+            // ThreadPool это встроенный пул рабочих потоков, который управляется средой выполнения
+            // и используется для запуска коротких фоновых задач без ручного создания Thread 
+            // Вместо того чтобы каждый раз создавать новый поток, .NET держит набор уже готовых потоков
+            // и выдает их по необходимости.
+            ThreadPool.QueueUserWorkItem((item) => { Console.WriteLine("Hello from ThreadPool"); });
+            // или
+            ThreadPool.QueueUserWorkItem(new WaitCallback(MyMethod), 5);
+            Thread.Sleep(1000); // Если без Sleep, то не увидим на консоли предыдущего сообщения 
+            Console.WriteLine("Hello from Main");
+
+            // BeginInvoke EndInvoke — это старый (но важный) механизм асинхронного выполнения в .NET,
+            // который появился ещё до async/await и Task. Его часто называют
+            // APM (Asynchronous Programming Model)
+            // BeginInvoke → запускает метод асинхронно
+            // EndInvoke → получает результат, ждёт завершения и завершает операцию
+            // .NET10 это не поддерживает
+            /*
+            refMethod = MyMethod1;
+            refMethod.BeginInvoke("Hello", (result) => 
+            { int res = refMethod.EndInvoke(result); Console.WriteLine(res); }, null );
+            */
+
+            // Task → высокоуровневая абстракция (работает через ThreadPool)
+            Task<int> myTask = new Task<int>(MyMethod1, "Hello from Task thread"); 
+            myTask.Start();
+            myTask.Wait();
+            Console.WriteLine(myTask.Result);
+            Console.WriteLine("Hello from Main");
+
+            // async await
+
+
+            // Parallel (не асинхронно) пример использования
+            // Это класс из System.Threading.Tasks, который позволяет выполнять несколько операций параллельно
+            // на разных потоках.Обычно используют:
+
+            // Parallel.For Обычный цикл, но итерации могут выполняться одновременно.
+            // здесь цикл идет от 0 до 10
+            // несколько итераций могут выполняться одновременно
+            // порядок вывода (выполнения) не гарантируется
+            Console.WriteLine("Parallel is working");
+            Console.WriteLine($"Текущий основной поток {Thread.CurrentThread.ManagedThreadId}");
+            Parallel.For(0, 11, i =>
             {
-                for (int i = 0; i < 1000; i++)
-                    Console.WriteLine($"Работа выполняется {i}");
+                Console.WriteLine($"Итерация {i}, поток {Thread.CurrentThread.ManagedThreadId}");
+                Thread.Sleep(500);
             });
-            task.Start();
-            for (int i = 0; i < 10; i++)
-                Console.WriteLine(StrExpls.DoSmth());
-            //task.Wait();
+
+            Console.WriteLine("Готово");
+
+            // Parallel.ForEach Удобно, когда есть коллекция.
+            // Тут каждый элемент списка обрабатывается параллельно.
+            Console.WriteLine("Parallel is working");
+            Console.WriteLine($"Текущий основной поток {Thread.CurrentThread.ManagedThreadId}");
+            List<string> names = new List<string> { "Anna", "Oleg", "Max", "Ira" };
+
+            Parallel.ForEach(names, name =>
+            {
+                Console.WriteLine($"{name} -> поток {Thread.CurrentThread.ManagedThreadId}");
+                Thread.Sleep(300);
+            });
+
+            Console.WriteLine("Обработка завершена");
+
+            // Parallel.Invoke Когда нужно просто запустить несколько независимых методов одновременно.
+            Console.WriteLine("Parallel is working");
+            Console.WriteLine($"Текущий основной поток {Thread.CurrentThread.ManagedThreadId}");
+            Parallel.Invoke(
+                Method1,
+                Method2,
+                Method3
+            );
+
+            Console.WriteLine("Все методы завершены");
+        
+            static void Method1()
+            {
+                Console.WriteLine($"Method1, поток {Thread.CurrentThread.ManagedThreadId}");
+                Thread.Sleep(1000);
+            }
+
+            static void Method2()
+            {
+                Console.WriteLine($"Method2, поток {Thread.CurrentThread.ManagedThreadId}");
+                Thread.Sleep(1000);
+            }
+
+            static void Method3()
+            {
+                Console.WriteLine($"Method3, поток {Thread.CurrentThread.ManagedThreadId}");
+                Thread.Sleep(1000);
+            }
+
+            // async/await
+            // используют в HTTP-запросы (API)  Работа с файлами  База данных  Любые I / O операции
+            Console.WriteLine("Начало");
+
+            await DoWorkAsync(); // await — ожидает завершения задачи, не блокируя поток
+
+            Console.WriteLine("Конец");
+            
             Console.WriteLine(new string('-', 100));
+        }
+
+        // async — говорит, что метод асинхронный
+        static async Task DoWorkAsync()
+        {
+            Console.WriteLine("Работа началась");
+
+            await Task.Delay(2000); // имитация долгой операции (2 секунды)
+
+            Console.WriteLine("Работа закончилась");
+        }
+
+        delegate int MyDelegate(string s);
+        static MyDelegate? refMethod;
+
+        static void MyMethod(object state)
+        {
+            Console.WriteLine($"Hello from ThreadPool {state}");
+        }
+        static int MyMethod1(object str)
+        {
+            Console.WriteLine($"{str}");
+            return (str as string).Length;
         }
     }
 }
